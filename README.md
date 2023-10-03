@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Prisma Database Migration
 
-## Getting Started
+This Prisma database migration creates the following tables:
 
-First, run the development server:
+* **categories:** This table stores information about product categories.
+* **products:** This table stores information about products.
+* **users:** This table stores information about users.
+* **customers:** This table stores information about customers.
+* **invoices:** This table stores information about invoices.
+* **invoice_products:** This table stores information about the products associated with an invoice.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**Relationships**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The following relationships exist between the different tables:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+* One category can have many products.
+* One product can belong to one category.
+* One user can have many customers.
+* One customer can belong to one user.
+* One user can have many invoices.
+* One invoice can belong to one user.
+* One invoice can have many products.
+* One product can be associated with many invoices.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+**onDelete:Restrict**
 
-## Learn More
+The `onDelete:Restrict` option is used for all of the foreign key relationships. This prevents orphaned records from being created in the database. For example, if you delete a category, all of the products associated with that category will also be deleted.
 
-To learn more about Next.js, take a look at the following resources:
+**onUpdate:Cascade**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The `onUpdate:Cascade` option is used for all of the foreign key relationships that point to the `users` model. This ensures that all of the records associated with a user are updated if the user's information is changed. For example, if you change the user's name, all of the invoices associated with that user will also have their user name updated.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+**Usage**
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+To use this Prisma database migration, you can run the following command:
