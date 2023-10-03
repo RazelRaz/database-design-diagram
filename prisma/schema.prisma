@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model categories {
+  id           BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  categoryName String    @db.VarChar(50)
+  user_id     BigInt     @db.UnsignedBigInt
+  createdAt   DateTime   @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime   @default(now()) @db.Timestamp(0) @updatedAt
+  products   products[]
+}
+
+model products {
+  id               BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id          BigInt             @db.UnsignedBigInt
+  category_id      BigInt             @db.UnsignedBigInt
+  name             String             @db.VarChar(200)
+  price            String             @db.VarChar(50)
+  unit            String             @db.VarChar(50)
+  image            String             @db.VarChar(200)
+  created_at       DateTime           @default(now()) @db.Timestamp(0)
+  updated_at       DateTime           @default(now()) @db.Timestamp(0) @updatedAt
+
+  categories       categories         @relation(fields: [category_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  invoice_products invoice_products[]
+
+}
+
+
+model users {
+  id                BigInt             @id @default(autoincrement()) @db.UnsignedBigInt
+  first_name        String            @db.VarChar(100)
+  last_name        String             @db.VarChar(100)
+  email             String             @unique(map: "users_email_unique") @db.VarChar(50)
+  mobile        String             @db.VarChar(100)
+  password String    @db.VarChar(255)
+  otp               String             @db.VarChar(10)
+  created_at        DateTime           @default(now()) @db.Timestamp(0)
+  updated_at        DateTime           @default(now()) @db.Timestamp(0) @updatedAt
+
+  customers customers?
+  invoices invoices[]
+  invoice_products invoice_products[]
+}
+
+
+model customers {
+  id              BigInt            @id @default(autoincrement()) @db.UnsignedBigInt
+  name        String            @db.VarChar(100)
+  email             String             @unique(map: "users_email_unique") @db.VarChar(50)
+  mobile        String             @db.VarChar(100)
+  user_id         BigInt            @unique(map: "customer_profiles_user_id_unique") @db.UnsignedBigInt
+
+  created_at      DateTime          @default(now()) @db.Timestamp(0)
+  updated_at      DateTime          @default(now()) @db.Timestamp(0) @updatedAt
+  users           users             @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+}
+
+
+model invoices {
+  id               BigInt                   @id @default(autoincrement()) @db.UnsignedBigInt
+  total            String                   @db.VarChar(50)
+  discount         String                   @db.VarChar(50)
+  vat              String                   @db.VarChar(50)
+  payable          String                   @db.VarChar(50)
+  user_id         BigInt                    @unique(map: "customer_profiles_user_id_unique") @db.UnsignedBigInt
+  customer_id         BigInt                    @unique(map: "customer_user_id_unique") @db.UnsignedBigInt
+  created_at       DateTime                 @default(now()) @db.Timestamp(0)
+  updated_at       DateTime                 @default(now()) @db.Timestamp(0) @updatedAt
+
+  invoice_products invoice_products[]
+  users            users                    @relation(fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+
+}
+
+
+model invoice_products {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  invoice_id BigInt   @db.UnsignedBigInt
+  product_id BigInt   @db.UnsignedBigInt
+  user_id    BigInt   @db.UnsignedBigInt
+  qty        String   @db.VarChar(50)
+  sale_price String   @db.VarChar(50)
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+  invoices   invoices @relation(fields: [invoice_id], references: [id], map: "invoice_products_invoice_id_foreign")
+  products   products @relation(fields: [product_id], references: [id], map: "invoice_products_product_id_foreign")
+  users      users    @relation(fields: [user_id], references: [id], map: "invoice_products_user_id_foreign")
+
+  @@index([invoice_id], map: "invoice_products_invoice_id_foreign")
+  @@index([product_id], map: "invoice_products_product_id_foreign")
+  @@index([user_id], map: "invoice_products_user_id_foreign")
+}
